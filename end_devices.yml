@@ -1,0 +1,6 @@
+---
+end_devices:
+  - MAC: 0050.7966.6800
+    HOSTNAME: PC1
+  - MAC: 0050.7966.6801
+    HOSTNAME: PC2
