@@ -13,9 +13,9 @@
 # !/usr/bin/end python
 
 from netmiko import ConnectHandler
-from netmiko.ssh_exception import  NetMikoTimeoutException
+from netmiko.ssh_exception import NetMikoTimeoutException
 from paramiko.ssh_exception import SSHException
-from netmiko.ssh_exception import  AuthenticationException
+from netmiko.ssh_exception import AuthenticationException
 from yaml import safe_load
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound, TemplateSyntaxError
 import re
@@ -53,8 +53,6 @@ def render_j2_template(filename, *args, **kwargs):
     except TemplateSyntaxError as syntax_error:
         print(f"Unable to compile template due to syntax error.\n------\n{syntax_error.message()}")
         return None
-
-
 
 
 #####################################################################################################################
@@ -151,7 +149,7 @@ def main():
     with open("end_devices.yml", "r") as device_handle:
         devices = safe_load(device_handle)
 
-    #platform_map = {"ios": "cisco_ios", "iosxr": "cisco_xr"}
+    # platform_map = {"ios": "cisco_ios", "iosxr": "cisco_xr"}
 
     shmactbl_config = render_j2_template("showmacaddrtable.j2")
 
@@ -159,7 +157,7 @@ def main():
 
         print(f"Searching for {device['MAC']}...")
         for host in hosts_root["host_list"]:
-            #platform = platform_map[host["platform"]]
+            # platform = platform_map[host["platform"]]
             platform = host["platform"]
             address = host["address"]
 
