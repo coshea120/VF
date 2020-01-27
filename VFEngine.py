@@ -10,7 +10,7 @@
 #
 #####################################################################################################################
 
-# !/usr/bin/end python
+# !/usr/bin/env python
 
 from netmiko import ConnectHandler
 from netmiko.ssh_exception import NetMikoTimeoutException
