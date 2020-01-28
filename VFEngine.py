@@ -13,9 +13,8 @@
 # !/usr/bin/env python
 
 from netmiko import ConnectHandler
-from netmiko.ssh_exception import NetMikoTimeoutException
+from netmiko.ssh_exception import NetMikoTimeoutException, AuthenticationException
 from paramiko.ssh_exception import SSHException
-from netmiko.ssh_exception import AuthenticationException
 from yaml import safe_load
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound, TemplateSyntaxError
 import re
@@ -73,8 +72,19 @@ def render_j2_template(filename, *args, **kwargs):
 #####################################################################################################################
 
 def create_mac_address_dictionary(connection, j2_config):
+    
+    # show mac address-table provides tabular output that starts with the first column being an integer between 1 and 4
+    # digits long for the vlan.  After, the mac address appears as 3 sets of 4 characters separated by periods.  After
+    # that, there is a 'type' field that is a string of characters.  Finally, there is the 'port' field which is 2 letters 
+    # followed by additional characaters (letters/numbers/special characters).  This regular expression attempts to match 
+    # that pattern in the show mac address-table output, and places the individual values into named groups.
+    
     regex = r'(?P<vlan>\d{1,4})\s+(?P<macaddr>\w{4}.\w{4}.\w{4})\s+(?P<type>(\w+))\s+(?P<port>(\S+))'
 
+    # This dictionary will have mac addresses as keys (typed as strings), and a tuple of key-value pairs of the 
+    # remaining 3 columns from show mac address-table as the value 
+    # e.g. { aaaa.bbbb.cccc : {'vlan':10,'type':DYNAMIC,'port':Gi1/0/2} }
+    
     mac_dictionary = {}
 
     result = connection.send_config_set(j2_config.split("\n"))
@@ -175,6 +185,8 @@ def main():
             except SSHException:
                 print(f"Check if SSH is enabled on {address}.")
             else:
+              # Do a little sanity check to verify successful login.  If we can pull the prompt from the
+              # device on the other side, the connection is good.
                 print(f"Logged into {connection.find_prompt()} successfully.")
 
                 mac_dict = create_mac_address_dictionary(connection, shmactbl_config)
@@ -183,6 +195,7 @@ def main():
 
                 if mac in mac_dict.keys():
                     print(f"{mac} found on {mac_dict[mac]['port']}.  Checking operational mode...")
+                          
                     shswport_config = render_j2_template("showintswitchport.j2", int=mac_dict[mac]['port'])
                     result = get_switchport_operational_mode(connection, shswport_config).lower()
 
