@@ -7,7 +7,10 @@ from yaml import safe_load
 
 async def connect_ssh(address: str, username: str, password: str, platform: str):
     async with netdev.create(username=username, password=password, device_type=platform, host=address) as connection:
-        output = await connection.send_command('show version')
+        print(f'Connected to {connection.base_prompt} successfully.')
+        output = await connection.send_command('show mac address-table | incl 0050.7966.6800')
+        print(output)
+        # connection.disconnect()
 
 
 async def main():
@@ -25,3 +28,4 @@ async def main():
 
 if __name__ == '__main__':
     asyncio.run(main())
+
