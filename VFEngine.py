@@ -153,7 +153,7 @@ def get_switchport_operational_mode(connection, j2_config):
 
 
 def main():
-    with open("hosts.yml", "r") as hosts_handle:
+    with open("switches.yml", "r") as hosts_handle:
         hosts_root = safe_load(hosts_handle)
 
     with open("end_devices.yml", "r") as device_handle:
