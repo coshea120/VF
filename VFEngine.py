@@ -72,35 +72,13 @@ def render_j2_template(filename, *args, **kwargs):
 #####################################################################################################################
 
 def create_mac_address_dictionary(connection, j2_config):
-    
-    # show mac address-table provides tabular output that starts with the first column being an integer between 1 and 4
-    # digits long for the vlan.  After, the mac address appears as 3 sets of 4 characters separated by periods.  After
-    # that, there is a 'type' field that is a string of characters.  Finally, there is the 'port' field which is 2 letters 
-    # followed by additional characaters (letters/numbers/special characters).  This regular expression attempts to match 
-    # that pattern in the show mac address-table output, and places the individual values into named groups.
-    
-    regex = r'(?P<vlan>\d{1,4})\s+(?P<macaddr>\w{4}.\w{4}.\w{4})\s+(?P<type>(\w+))\s+(?P<port>(\S+))'
-
-    # This dictionary will have mac addresses as keys (typed as strings), and a tuple of key-value pairs of the 
-    # remaining 3 columns from show mac address-table as the value 
-    # e.g. { aaaa.bbbb.cccc : {'vlan':10,'type':DYNAMIC,'port':Gi1/0/2} }
-    
-    mac_dictionary = {}
 
     result = connection.send_config_set(j2_config.split("\n"))
 
-    for line in result.split('\n'):
+    if result != '':
+        vlan, mac, porttype, port = result.split()
+        return {mac: {'vlan': vlan, 'type': porttype, 'port': port}}
 
-        matches = re.search(regex, line)
-        if matches is not None:
-            mac_dictionary[matches.group('macaddr')] = \
-                {
-                    'vlan': matches.group('vlan'),
-                    'type': matches.group('type'),
-                    'port': matches.group('port')
-                }
-
-    return mac_dictionary
 
 
 #####################################################################################################################
@@ -161,9 +139,9 @@ def main():
 
     # platform_map = {"ios": "cisco_ios", "iosxr": "cisco_xr"}
 
-    shmactbl_config = render_j2_template("showmacaddrtable.j2")
-
     for device in devices['end_devices']:
+
+        shmactbl_config = render_j2_template("showmacaddrtable.j2", mac=device['MAC'])
 
         print(f"Searching for {device['MAC']}...")
         for host in hosts_root["host_list"]:
