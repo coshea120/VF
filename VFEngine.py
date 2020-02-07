@@ -16,42 +16,6 @@ from netmiko import ConnectHandler
 from netmiko.ssh_exception import NetMikoTimeoutException, AuthenticationException
 from paramiko.ssh_exception import SSHException
 from yaml import safe_load
-from jinja2 import Environment, FileSystemLoader, TemplateNotFound, TemplateSyntaxError
-import re
-
-
-#####################################################################################################################
-#
-#   Name - render_j2_template
-#
-#   Description - This function opens a jinja2 template from a file and returns the rendered command from the template
-#   and additional parameters
-#
-#   Parameters
-#       - filename - The path to the jinja2 template file.
-#       - *args - argument list (built in syntax for command-line argument lists)
-#       - **kwargs - argument dictionary (built in syntax for command-line argument dictionaries)
-#
-#   Return - Returns the rendered template as a string
-#####################################################################################################################
-
-
-def render_j2_template(filename, *args, **kwargs):
-    try:
-        j2_environment = Environment(
-            loader=FileSystemLoader("."),
-            trim_blocks=True,
-            autoescape=True
-        )
-
-        template = j2_environment.get_template(filename)
-        return template.render(*args, **kwargs)
-    except TemplateNotFound as file_not_found:
-        print(f"Unable to find template {filename}.\n-----\n{file_not_found.message}")
-        return None
-    except TemplateSyntaxError as syntax_error:
-        print(f"Unable to compile template due to syntax error.\n------\n{syntax_error.message()}")
-        return None
 
 
 #####################################################################################################################
@@ -65,20 +29,17 @@ def render_j2_template(filename, *args, **kwargs):
 #
 #   Parameters
 #       - connection - The active netmiko client session with the target switch
-#       - j2_config - The rendered jinja2 template that will run in CLI
 #
 #   Return - Dictionary representing the output of 'show mac address-table' on the target switch
 #
 #####################################################################################################################
 
-def create_mac_address_dictionary(connection, j2_config):
+def create_mac_address_dictionary(connection, mac):
 
-    result = connection.send_config_set(j2_config.split("\n"))
-
+    result = connection.send_command('show mac address-table | incl ' + mac)
     if result != '':
         vlan, mac, porttype, port = result.split()
         return {mac: {'vlan': vlan, 'type': porttype, 'port': port}}
-
 
 
 #####################################################################################################################
@@ -92,17 +53,14 @@ def create_mac_address_dictionary(connection, j2_config):
 #
 #   Parameters
 #       - connection - The active netmiko client session with the target switch
-#       - j2_config - The rendered jinja2 template that will run in CLI
 #
 #   Return - String representing operational mode of the switchport
 #
 #####################################################################################################################
-def get_switchport_operational_mode(connection, j2_config):
-    result = connection.send_config_set(j2_config.split("\n"))
-
-    for result_line in result.split("\n"):
-        if 'Operational Mode:' in result_line:
-            return result_line.split(":")[1].lstrip()
+def get_switchport_operational_mode(connection, portID):
+    result = connection.send_command('show interface ' + portID + ' switchport | incl Operational Mode')
+    val = result.split(":")[1].lstrip()
+    return result.split(":")[1].lstrip()
 
 
 #####################################################################################################################
@@ -141,10 +99,8 @@ def main():
 
     for device in devices['end_devices']:
 
-        shmactbl_config = render_j2_template("showmacaddrtable.j2", mac=device['MAC'])
-
         print(f"Searching for {device['MAC']}...")
-        for host in hosts_root["host_list"]:
+        for host in hosts_root["switch_list"]:
             # platform = platform_map[host["platform"]]
             platform = host["platform"]
             address = host["address"]
@@ -163,19 +119,17 @@ def main():
             except SSHException:
                 print(f"Check if SSH is enabled on {address}.")
             else:
-              # Do a little sanity check to verify successful login.  If we can pull the prompt from the
-              # device on the other side, the connection is good.
+                # Do a little sanity check to verify successful login.  If we can pull the prompt from the
+                # device on the other side, the connection is good.
                 print(f"Logged into {connection.find_prompt()} successfully.")
 
-                mac_dict = create_mac_address_dictionary(connection, shmactbl_config)
-
                 mac = device['MAC']
+                mac_dict = create_mac_address_dictionary(connection, mac)
 
                 if mac in mac_dict.keys():
                     print(f"{mac} found on {mac_dict[mac]['port']}.  Checking operational mode...")
-                          
-                    shswport_config = render_j2_template("showintswitchport.j2", int=mac_dict[mac]['port'])
-                    result = get_switchport_operational_mode(connection, shswport_config).lower()
+
+                    result = get_switchport_operational_mode(connection, mac_dict[mac]['port']).lower()
 
                     if result == 'static access':
                         print(f"MAC address {mac} is located on {address} on interface {mac_dict[mac]['port']}")
