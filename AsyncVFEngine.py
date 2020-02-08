@@ -2,6 +2,7 @@
 
 import netdev
 import asyncio
+import trio
 from yaml import safe_load
 
 
