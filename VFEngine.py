@@ -10,7 +10,7 @@
 #
 #####################################################################################################################
 
-# !/usr/bin/env python
+#!/usr/bin/env python
 
 from netmiko import ConnectHandler
 from netmiko.ssh_exception import NetMikoTimeoutException, AuthenticationException
@@ -22,9 +22,9 @@ from yaml import safe_load
 #
 #   Name - create_mac_address_dictionary
 #
-# Description - This function runs 'show mac address-table' on the ssh session represented by 'connection',
-# and creates a dictionary of that data with the mac address as the key of type string, and the remaining values
-# stored as a tuple
+#   Description - This function runs 'show mac address-table' on the ssh session represented by 'connection',
+#   and creates a dictionary of that data with the mac address as the key of type string, and the remaining values
+#   stored as a tuple
 #
 #
 #   Parameters
@@ -34,11 +34,12 @@ from yaml import safe_load
 #
 #####################################################################################################################
 def create_mac_address_dictionary(connection, mac):
-
     result = connection.send_command('show mac address-table | incl ' + mac)
     if result != '':
         vlan, mac, porttype, port = result.split()
         return {mac: {'vlan': vlan, 'type': porttype, 'port': port}}
+    else:
+        return None
 
 
 #####################################################################################################################
@@ -59,7 +60,11 @@ def create_mac_address_dictionary(connection, mac):
 #####################################################################################################################
 def get_switchport_operational_mode(connection, portID: str):
     result = connection.send_command('show interface ' + portID + ' switchport | incl Operational Mode')
-    return result.split(":")[1].lstrip()
+
+    if result != '':
+        return result.split(":")[1].lstrip()
+    else:
+        return None
 
 
 #####################################################################################################################
@@ -76,7 +81,6 @@ def get_switchport_operational_mode(connection, portID: str):
 #
 #####################################################################################################################
 def search_for_mac(mac: str):
-
     with open("switches.yml", "r") as hosts_handle:
         hosts_root = safe_load(hosts_handle)
 
@@ -108,7 +112,6 @@ def search_for_mac(mac: str):
 
             if mac in mac_dict.keys():
                 print(f"{mac} found on {mac_dict[mac]['port']}.  Checking operational mode...")
-
                 result = get_switchport_operational_mode(connection, mac_dict[mac]['port']).lower()
 
                 if result == 'static access':
