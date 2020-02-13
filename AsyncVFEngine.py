@@ -22,11 +22,12 @@ from yaml import safe_load
 #####################################################################################################################
 async def create_mac_address_dictionary(connection, mac):
     result = await connection.send_command('show mac address-table | incl ' + mac)
+    
     if result != '':
         vlan, mac, porttype, port = result.split()
         return {mac: {'vlan': vlan, 'type': porttype, 'port': port}}
-    else:
-        return None
+    
+    return None
 
 
 #####################################################################################################################
@@ -50,8 +51,8 @@ async def get_switchport_operational_mode(connection, portID: str):
 
     if result != '':
         return result.split(":")[1].lstrip()
-    else:
-        return None
+    
+    return None
 
 
 async def find_mac_address_on_switch(address: str, username: str, password: str, platform: str, maclist):
