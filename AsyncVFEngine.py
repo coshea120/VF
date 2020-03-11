@@ -4,7 +4,6 @@ import netdev
 import asyncio
 from yaml import safe_load
 
-
 #####################################################################################################################
 #
 #   Name - create_mac_address_dictionary
@@ -53,6 +52,26 @@ async def get_switchport_operational_mode(connection, portID: str):
         return result.split(":")[1].lstrip()
     
     return None
+
+#####################################################################################################################
+#
+#   Name - find_mac_address_on_switch
+#
+#   Description - This function establishes an SSH connection with the switch running 'platform' at 'address' using  
+#                 'username' and 'password' to authenticate.  The function then iterates over 'maclist', checking if
+#                 an entry in 'maclist' shows in the switch's mac address table.  If so, check if it is a static 
+#                 access port.  If so, we have found the port connected to the end device with the current mac address.  
+#
+#   Parameters
+#       - address - Address of the switch to connect to
+#       - username - username to use when authenticating with 'address'
+#       - password - password to use with 'username'
+#       - platform - the platform/OS the target switch is running (e.g. cisco IOS, IOSXR, JunOS, etc.)
+#       - maclist - list of MAC addresses of end devices that we are looking for
+#
+#   Return - String representing operational mode of the switchport
+#
+#####################################################################################################################
 
 
 async def find_mac_address_on_switch(address: str, username: str, password: str, platform: str, maclist):
