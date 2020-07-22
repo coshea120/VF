@@ -14,7 +14,7 @@ from yaml import safe_load
 #
 #
 #   Parameters
-#       - connection - The active netmiko client session with the target switch
+#       - connection - The active client session with the target switch
 #
 #   Return - Dictionary representing the output of 'show mac address-table' on the target switch
 #
@@ -39,7 +39,7 @@ async def create_mac_address_dictionary(connection, mac):
 #
 #
 #   Parameters
-#       - connection - The active netmiko client session with the target switch
+#       - connection - The active client session with the target switch
 #       - portID - String representing the switchport interface ID e.g. Gi1/0
 #
 #   Return - String representing operational mode of the switchport
