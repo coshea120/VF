@@ -49,7 +49,7 @@ async def get_switchport_operational_mode(connection, portID: str):
     result = await connection.send_command('show interface ' + portID + ' switchport | incl Operational Mode')
 
     if result != '':
-        return result.split(":")[1].lstrip()
+        return result.split(":")[1]
     
     return None
 
