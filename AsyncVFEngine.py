@@ -112,6 +112,9 @@ async def find_mac_address_on_switch(address: str, username: str, password: str,
 #
 #   Todo's - Tasks generate output, but nothing is done with it.  Can be used to return error messages, generate logs, 
 #            etc.
+#          - Right now, credentials to SSH into switches are stored in the YAML file.  First, this is insecure.  Second,
+#            it is redundant since each entry in the YAML file has the creds repeated.  Prompt user to enter credentials
+#            securely, and use those for all switches.
 #
 ########################################################################################################################
                           
