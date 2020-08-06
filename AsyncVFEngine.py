@@ -97,6 +97,24 @@ async def find_mac_address_on_switch(address: str, username: str, password: str,
                     print(f"{mac_dict[mac_str]['port']} on {address} is not operating as an access port.  Ignoring...")
 
 
+########################################################################################################################
+#
+#   Name - main
+#
+#   Description - Script's entry point.  First, it opens a YAML file that represents the switches that will be searched.
+#   Next, it opens another YAML file that represents the end devices that we are looking for.  After, it creates a 
+#   collection of asynchronous tasks for each switch.  The purpose is to be able to search multiple switches in parallel 
+#   instead sequentially to boost speed.  One task is created and executed for each switch that needs to be searched.
+#
+#   Parameters - None
+#      
+#   Return - N/A
+#
+#   Todo's - Tasks generate output, but nothing is done with it.  Can be used to return error messages, generate logs, 
+#            etc.
+#
+########################################################################################################################
+                          
 async def main():
     with open("switches.yml", "r") as switches_handle:
         switches_root = safe_load(switches_handle)
