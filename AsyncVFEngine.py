@@ -12,11 +12,11 @@ from yaml import safe_load
 #   and creates a dictionary of that data with the mac address as the key of type string, and the remaining values
 #   stored as a tuple
 #
-#
 #   Parameters
 #       - connection - The active client session with the target switch
 #
-#   Return - Dictionary representing the output of 'show mac address-table' on the target switch
+#   Return - Dictionary representing the output of 'show mac address-table | include <mac>' on the target switch, or 
+#            None if MAC does  not appear in MAC address table
 #
 #####################################################################################################################
 async def create_mac_address_dictionary(connection, mac):
@@ -42,7 +42,7 @@ async def create_mac_address_dictionary(connection, mac):
 #       - connection - The active client session with the target switch
 #       - portID - String representing the switchport interface ID e.g. Gi1/0
 #
-#   Return - String representing operational mode of the switchport
+#   Return - String representing operational mode of the switchport, None if CLI command returns no output.
 #
 #####################################################################################################################
 async def get_switchport_operational_mode(connection, portID: str):
@@ -69,7 +69,7 @@ async def get_switchport_operational_mode(connection, portID: str):
 #       - platform - the platform/OS the target switch is running (e.g. cisco IOS, IOSXR, JunOS, etc.)
 #       - maclist - list of MAC addresses of end devices that we are looking for
 #
-#   Return - String representing operational mode of the switchport
+#   Return - N/A
 #
 #####################################################################################################################
 
