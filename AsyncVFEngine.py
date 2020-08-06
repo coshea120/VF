@@ -91,7 +91,7 @@ async def find_mac_address_on_switch(address: str, username: str, password: str,
                 print(f"{mac_str} found on {mac_dict[mac_str]['port']}.  Checking operational mode...")
                 result = await get_switchport_operational_mode(connection, mac_dict[mac_str]['port'])
 
-                if result.lower() == 'static access':
+                if 'access' in result.lower():
                     print(f"MAC address {mac_str} is located on {address} on interface {mac_dict[mac_str]['port']}")
                 else:
                     print(f"{mac_dict[mac_str]['port']} on {address} is not operating as an access port.  Ignoring...")
