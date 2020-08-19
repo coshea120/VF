@@ -2,6 +2,7 @@
 
 import netdev
 import asyncio
+import getpass
 from yaml import safe_load
 
 #####################################################################################################################
@@ -99,6 +100,32 @@ async def find_mac_address_on_switch(address: str, username: str, password: str,
 
 ########################################################################################################################
 #
+#   Name - get_credentials
+#
+#   Description - Prompts the user for a username and password to be used when attempting to establish SSH connections
+#   with the access switches.  Makes use of Python's built-in getpass module.                           
+#
+#   Parameters - None
+#      
+#   Return - Key-value pair where the username is the key, and the password is the value
+#
+#   Todo's - 
+#
+########################################################################################################################
+
+def get_credentials():
+    try:
+        u = getpass.getuser()
+        p = getpass.getpass(f"Enter password for {u}.")
+        
+    except:
+        return None
+    else:
+        return {u:p}
+  
+
+########################################################################################################################
+#
 #   Name - main
 #
 #   Description - Script's entry point.  First, it opens a YAML file that represents the switches that will be searched.
@@ -124,11 +151,13 @@ async def main():
 
     with open("end_devices.yml", "r") as device_handle:
         devices = safe_load(device_handle)
-
+                          
+    (username, password), = get_credentials().items()
+                          
     connection_list = [asyncio.create_task(find_mac_address_on_switch(address=switch['address'],
                                                                       platform=switch['platform'],
-                                                                      username=switch['username'],
-                                                                      password=switch['password'],
+                                                                      username=username,
+                                                                      password=password,
                                                                       maclist=devices['end_devices']))
                        for switch in switches_root['switch_list']]
 
