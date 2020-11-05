@@ -1,18 +1,6 @@
 ---
 switch_list:
-  - address: "10.109.0.201"
+  - address: "10.201.126.21"
     platform: "cisco_ios"
-    username: "coshea"
-    password: "cisco"
-  - address: "10.109.0.202"
-    platform: "cisco_ios"
-    username: "coshea"
-    password: "cisco"
-  - address: "10.109.0.203"
-    platform: "cisco_ios"
-    username: "coshea"
-    password: "cisco"
-  - address: "10.109.0.204"
-    platform: "cisco_ios"
-    username: "coshea"
-    password: "cisco"
+
+
