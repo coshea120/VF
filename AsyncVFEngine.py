@@ -22,7 +22,7 @@ from yaml import safe_load
 '''
 
 async def create_mac_address_dictionary(connection, mac):
-    result = await connection.send_command(f'show mac address-table') # | incl {mac}')
+    result = await connection.send_command(f'show mac address-table | i {mac}')
     
     if result != '':
         #result = result.split('\n')[0]
